@@ -1,41 +1,40 @@
 from rest_framework import serializers
-from userauth.models import Staff, Student, CustomUser, Admin
+from userauth.models import CustomUser
 from userauth.models import Student
-from userauth.serializers import StaffSerializer, StudentSerializer
 
 
-class CustomUserStaffSerializer(serializers.ModelSerializer):
+class UserCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email', 'password', 'role']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
         user = CustomUser(
             username=validated_data['username'],
             email=validated_data['email'],
-            role='staff'
+            role=validated_data['role']
         )
         user.set_password(validated_data['password'])
         user.save()
         return user
 
 
-class CustomUserStudentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'username', 'email', 'password']
-        extra_kwargs = {'password': {'write_only': True}}
+# class CustomUserStudentSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CustomUser
+#         fields = ['id', 'username', 'email', 'password']
+#         extra_kwargs = {'password': {'write_only': True}}
 
-    def create(self, validated_data):
-        user = CustomUser(
-            username=validated_data['username'],
-            email=validated_data['email'],
-            role='student'
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
+#     def create(self, validated_data):
+#         user = CustomUser(
+#             username=validated_data['username'],
+#             email=validated_data['email'],
+#             role='student'
+#         )
+#         user.set_password(validated_data['password'])
+#         user.save()
+#         return user
 
 
 class CustomStudentSerializerForAdmin(serializers.ModelSerializer):

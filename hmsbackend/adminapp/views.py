@@ -9,129 +9,46 @@ from userauth.serializers import StaffSerializer, StudentSerializer
 from superadmin.serializers import AdminCreationSerializer
 from userauth.Rolepermission import IsAdmin
 from userauth.models import Staff, Student, Admin
-from .serializers import CustomUserStaffSerializer, CustomUserStudentSerializer, CustomStudentSerializerForAdmin
+from .serializers import UserCreationSerializer, CustomStudentSerializerForAdmin
 from django.db.models import Count, Q
+from django.utils.crypto import get_random_string
 from django.db import models
 from rooms.models import Room, Bed
+from userauth.utils import user_creation_and_welcome
 
 
-class CreateStudentView(APIView):
-    permission_classes = [IsAdmin]
+class CreateUserView(APIView):
+    def post(self, request):
+        user_role = request.user.role
 
-    def post(self, request, *args, **kwargs):
-        # Extract user data
-        user_data = request.data.get('user', {})
-        admin_id = request.data.get('admin_id')
+        # Only allow superadmin and admin to create users
+        if user_role not in ['superadmin', 'admin']:
+            return Response({"msg": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
 
-        if not admin_id:
-            return Response({"error": "Admin ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('email'):
+            return Response({"msg": "Email is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        try:
-            admin = Admin.objects.get(pk=admin_id)
-        except Admin.DoesNotExist:
-            return Response({"error": "Admin not found."}, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('username'):
+            return Response({"msg": "Username is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validate and create the CustomUser instance
-        user_serializer = CustomUserStudentSerializer(data=user_data)
-        if user_serializer.is_valid():
-            user = user_serializer.save()  # Create the CustomUser instance
-        else:
-            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if not request.data.get('role'):
+            return Response({"msg": "Role is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Prepare student data with the created user and admin
-        student_data = {
-            'user': user.id,
-            'admin': admin.id,
-            'studentID': request.data.get('studentID'),
-            'name': request.data.get('name'),
-            'dob': request.data.get('dob'),
-            'contact': request.data.get('contact'),
-            'nationality': request.data.get('nationality'),
-            'gender': request.data.get('gender', 'other'),
-            'guardian_name': request.data.get('guardian_name'),
-            'guardian_contact': request.data.get('guardian_contact'),
-            'hostel': request.data.get('hostel'),
+        if request.data.get('role') not in ['staff', 'student']:
+            return Response({"msg": "Please enter a valid role."}, status=status.HTTP_403_FORBIDDEN)
 
-        }
+        temp_password = get_random_string(length=8)
+        # Add the generated password to the request data
+        request.data['password'] = temp_password
+        serializer = UserCreationSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
 
-        # Validate and create the Student instance
-        student_serializer = StudentSerializer(data=student_data)
-        if student_serializer.is_valid():
-            student = student_serializer.save()
-            return Response({
-                "user": user_serializer.data,
-                "student": student_serializer.data
-            }, status=status.HTTP_201_CREATED)
-        else:
-            return Response(student_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # Send the welcome email with the temporary credentials
+            user_creation_and_welcome(user, temp_password)
 
-    def get(self, request, *args, **kwargs):
-        student = Student.objects.all()
-        student_serializer = StudentSerializer(student, many=True)
-
-        return Response({
-            "student": student_serializer.data
-        }, status=status.HTTP_200_OK)
-
-
-class CreateStaffView(APIView):
-    permission_classes = [IsAdmin]
-
-    def get(self, request, *args, **kwargs):
-        # Retrieve all staff members
-        staff = Staff.objects.all()
-        staff_serializer = StaffSerializer(staff, many=True)
-
-        return Response({
-            "staff": staff_serializer.data
-        }, status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        user_data = {
-            'username': request.data.get('user[username]'),
-            'email': request.data.get('user[email]'),
-            'password': request.data.get('user[password]')
-        }
-        admin_id = request.data.get('admin_id')
-        # Validate admin ID
-        if not admin_id:
-            return Response({"error": "Admin ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            admin = Admin.objects.get(pk=admin_id)
-        except Admin.DoesNotExist:
-            return Response({"error": "Admin not found."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Validate and create the CustomUser
-        user_serializer = CustomUserStaffSerializer(data=user_data)
-        if user_serializer.is_valid():
-            user = user_serializer.save()  # Create the CustomUser instance
-        else:
-            return Response(user_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # Prepare staff data (ensure user and admin are included)
-        staff_data = {
-            'user': user.id,  # Passing user instance to StaffSerializer
-            'admin': admin.id,
-            'name': request.data.get('name'),
-            'shift': request.data.get('shift'),
-            'Department': request.data.get('Department'),
-            'gender': request.data.get('gender'),  # Add gender
-            'email': request.data.get('email'),    # Add email
-            'contact': request.data.get('contact'),
-            'photo': request.FILES.get('photo'),
-            'hostel': request.data.get('hostel'),
-        }
-
-        staff_serializer = StaffSerializer(data=staff_data)
-        if staff_serializer.is_valid():
-            staff = staff_serializer.save()
-            return Response({
-                "user": user_serializer.data,
-                "staff": staff_serializer.data
-            }, status=status.HTTP_201_CREATED)
-        else:
-            return Response(staff_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'message': 'User created successfully, an email has been sent to the user.'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class StudentViewForAdmin(ListAPIView):
