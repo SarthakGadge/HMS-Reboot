@@ -92,31 +92,31 @@ WSGI_APPLICATION = 'hmsbackend.wsgi.application'
 #     }
 # }
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'hms_schema',  # Replace with your actual database name
-#         'USER': 'root',  # Replace with your MySQL username
-#         'PASSWORD': '123456',  # Replace with your MySQL password
-#         'HOST': 'localhost',  # Use '127.0.0.1' if 'localhost' doesn't work
-#         'PORT': '3306',  # The default MySQL port
-
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hmsdb3',
-        'USER': 'dbmasteruser',
-        'PASSWORD': '123456789',
-        'HOST': 'ls-f8259bafe38561c18d0d411f37aefbfabc0ff7bf.citdgny2wnek.ap-south-1.rds.amazonaws.com',
-        'PORT': '3306',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+        'NAME': 'hms_schema',  # Replace with your actual database name
+        'USER': 'root',  # Replace with your MySQL username
+        'PASSWORD': '123456',  # Replace with your MySQL password
+        'HOST': 'localhost',  # Use '127.0.0.1' if 'localhost' doesn't work
+        'PORT': '3306',  # The default MySQL port
+
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'hmsdb3',
+#         'USER': 'dbmasteruser',
+#         'PASSWORD': '123456789',
+#         'HOST': 'ls-f8259bafe38561c18d0d411f37aefbfabc0ff7bf.citdgny2wnek.ap-south-1.rds.amazonaws.com',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         },
+#     }
+# }
 
 
 SIMPLE_JWT = {
