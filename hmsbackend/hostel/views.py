@@ -75,6 +75,9 @@ class HostelViewSet(viewsets.ModelViewSet):
 
 class HostelOccupancyView(APIView):
     def get(self, request):
+        if request.user.role not in ['admin', 'superadmin']:
+            return Response({'msg': 'You do not have the authorization for this action.'}, status=status.HTTP_401_UNAUTHORIZED)
+
         try:
             hostels = Hostel.objects.all()  # Get all hostels
             hostel_occupancies = []

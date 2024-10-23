@@ -10,6 +10,9 @@ class Inventory(models.Model):
     ]
 
     description = models.TextField()
+    quantity = models.IntegerField()
+    price = models.IntegerField()
+    category = models.CharField(max_length=100)
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default='not_approved')
     admin = models.ForeignKey(
@@ -18,6 +21,3 @@ class Inventory(models.Model):
 
     def __str__(self):
         return f"Inventory(description={self.description}, status={self.status})"
-    
-
-

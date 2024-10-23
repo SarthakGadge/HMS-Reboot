@@ -191,11 +191,10 @@ class BedViewForAdmin(APIView):
 
 
 class BedOccupancyView(APIView):
-    """
-    API to get bed occupancy percentage based on unavailable beds.
-    """
-
     def get(self, request):
+
+        if request.user.role not in ['admin', 'superadmin']:
+            return Response({'msg': 'You do not have the authorization for this action.'}, status=status.HTTP_401_UNAUTHORIZED)
         try:
             total_beds = Bed.objects.count()  # Count all beds
             # Count beds with 'unavailable' status
