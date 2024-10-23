@@ -1,5 +1,5 @@
 from django.urls import path, include
-from .views import RoomsOverviewView, BedViewSet, AmenityViewset, RoomStatsView, RoomViewSet, BedViewForAdmin
+from .views import BedOccupancyView, RoomsOverviewView, BedViewSet, AmenityViewset, RoomStatsView, RoomViewSet, BedViewForAdmin
 from rest_framework.routers import DefaultRouter
 
 
@@ -13,4 +13,5 @@ urlpatterns = [
     path('amenity/', AmenityViewset.as_view(), name='amenity'),
     path('admin_stats/', RoomStatsView.as_view(), name='RoomsBedsFloorView'),
     path('detailed_beds/', BedViewForAdmin.as_view(), name='bed_view'),
+    path('bed_occupancy/', BedOccupancyView.as_view(), name='bed_occupancy')
 ]

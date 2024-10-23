@@ -189,7 +189,17 @@ class BedViewForAdmin(APIView):
         serializer = CustomBedSerializerForAdmin(beds, many=True)
         return Response(serializer.data)
 
-
-# class RoomBookingViewSet(viewsets.ModelViewSet):
-#     queryset = RoomBooking.objects.all()
-#     serializer_class = RoomBookingSerializer
+class BedOccupancyView(APIView):
+        """
+        API to get bed occupancy percentage based on unavialbale beds.
+        """
+        def get(self, requset):
+            try:
+                occupancy = Bed.occupancy_percentage()
+                return Response({
+                    "Occupancy_percentage" : occupancy
+                }, status=status.HTTP_200_OK)
+            except Exception as e:
+                return Response({
+                    "error" : str(e)
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
