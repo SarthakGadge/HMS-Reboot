@@ -13,5 +13,5 @@ urlpatterns = [
     path('amenity/', AmenityViewset.as_view(), name='amenity'),
     path('admin_stats/', RoomStatsView.as_view(), name='RoomsBedsFloorView'),
     path('detailed_beds/', BedViewForAdmin.as_view(), name='bed_view'),
-    path('bed_occupancy/', BedOccupancyView.as_view(), name='bed_occupancy')
+    path('occupancy_rate/', BedOccupancyView.as_view(), name='bed_occupancy')
 ]

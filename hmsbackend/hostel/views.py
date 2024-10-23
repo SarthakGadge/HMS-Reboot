@@ -8,6 +8,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
+from rooms.models import Room, Bed
 
 
 class HostelViewSet(viewsets.ModelViewSet):
@@ -72,5 +73,42 @@ class HostelViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class GetHostelView(APIView):
-    pass
+class HostelOccupancyView(APIView):
+    def get(self, request):
+        try:
+            hostels = Hostel.objects.all()  # Get all hostels
+            hostel_occupancies = []
+
+            for hostel in hostels:
+                # Get all rooms in the hostel
+                rooms = Room.objects.filter(hostel=hostel)
+
+                # Get total beds in all rooms of this hostel
+                total_beds = Bed.objects.filter(room__in=rooms).count()
+
+                # Get unavailable (occupied) beds in this hostel
+                unavailable_beds = Bed.objects.filter(
+                    room__in=rooms, status='unavailable').count()
+
+                # Calculate occupancy percentage
+                if total_beds == 0:
+                    occupancy_percentage = 0
+                else:
+                    occupancy_percentage = (
+                        unavailable_beds / total_beds) * 100
+
+                # Add to result list
+                hostel_occupancies.append({
+                    "hostel_name": hostel.name,
+                    # Rounded to 3 decimal places
+                    "occupancy_percentage": round(occupancy_percentage, 3)
+                })
+
+            return Response({
+                "hostel_occupancies": hostel_occupancies
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "error": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

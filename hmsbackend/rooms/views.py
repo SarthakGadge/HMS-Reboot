@@ -189,17 +189,31 @@ class BedViewForAdmin(APIView):
         serializer = CustomBedSerializerForAdmin(beds, many=True)
         return Response(serializer.data)
 
+
 class BedOccupancyView(APIView):
-        """
-        API to get bed occupancy percentage based on unavialbale beds.
-        """
-        def get(self, requset):
-            try:
-                occupancy = Bed.occupancy_percentage()
-                return Response({
-                    "Occupancy_percentage" : occupancy
-                }, status=status.HTTP_200_OK)
-            except Exception as e:
-                return Response({
-                    "error" : str(e)
-                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    """
+    API to get bed occupancy percentage based on unavailable beds.
+    """
+
+    def get(self, request):
+        try:
+            total_beds = Bed.objects.count()  # Count all beds
+            # Count beds with 'unavailable' status
+            unavailable_beds = Bed.objects.filter(status='unavailable').count()
+
+            # Check for the total number of beds to avoid division by zero
+            if total_beds == 0:
+                occupancy = 0
+            else:
+                occupancy = (unavailable_beds / total_beds) * 100
+
+            occupancy = round(occupancy, 3)
+
+            return Response({
+                "Occupancy_percentage": occupancy
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "error": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
