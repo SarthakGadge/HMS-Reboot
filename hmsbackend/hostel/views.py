@@ -115,3 +115,10 @@ class HostelOccupancyView(APIView):
             return Response({
                 "error": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class Gethostelview(APIView):
+    def get(self, request):
+        hostel = Hostel.objects.all()
+        serializer = HostelSerializer(hostel, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
