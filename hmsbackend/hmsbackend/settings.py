@@ -46,7 +46,9 @@ INSTALLED_APPS = [
     'student',
     'staff',
     'inventory',
+    'geographical',
 ]
+
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

@@ -16,6 +16,7 @@ urlpatterns = [
     path('api/', include('student.urls')),
     path('api/', include('staff.urls')),
     path('api/', include('inventory.urls')),
+    path('geographical/', include('geographical.urls')),
 
 ]
 

@@ -44,7 +44,6 @@ class CreateUserView(APIView):
         if serializer.is_valid():
             user = serializer.save()
 
-            # Send the welcome email with the temporary credentials
             user_creation_and_welcome(user, temp_password)
 
             return Response({'message': 'User created successfully, an email has been sent to the user.'}, status=status.HTTP_201_CREATED)
