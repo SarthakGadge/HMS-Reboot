@@ -95,7 +95,7 @@ WSGI_APPLICATION = 'hmsbackend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'hms_schema',  # Replace with your actual database name
+        'NAME': 'hms',  # Replace with your actual database name
         'USER': 'root',  # Replace with your MySQL username
         'PASSWORD': '123456',  # Replace with your MySQL password
         'HOST': 'localhost',  # Use '127.0.0.1' if 'localhost' doesn't work
